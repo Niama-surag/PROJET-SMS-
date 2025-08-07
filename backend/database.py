@@ -20,6 +20,6 @@ Base = declarative_base()
 # Test de connexion
 try:
     with engine.connect() as connection:
-        print("✅ Connexion réussie à la base de données !")
+        print("Connexion réussie à la base de données")
 except Exception as e:
-    print("❌ Erreur de connexion :", e)
+    print("Erreur de connexion :", e)

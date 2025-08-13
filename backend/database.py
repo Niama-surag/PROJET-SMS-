@@ -1,33 +1,22 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
+import os
 
+# Charger les variables d'environnement
+load_dotenv()
 
-# Database URL - update with your PostgreSQL credentials
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:your_password@localhost/your_database"
+# URL de connexion à PostgreSQL
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Create SQLAlchemy engine
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# Créer l'engine
+engine = create_engine(DATABASE_URL)
 
-# Create SessionLocal class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Créer la session
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
-# Create Base class
+# Base pour les modèles
 Base = declarative_base()
-# Création des tables dans la base
+
 if __name__ == "__main__":
-    Base.metadata.create_all(bind=engine)
-    print("Tables créées avec succès")
-
-from models import user
-
-
-# Dependency to get DB session
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    print("Connexion réussie à la base de données")

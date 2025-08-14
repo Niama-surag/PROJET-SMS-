@@ -2,21 +2,19 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
 
+# Schéma de base (propriétés communes)
 class UserBase(BaseModel):
-    name: str
-    email: str
+    username: str
+    email: EmailStr
 
+# Schéma pour la création d'utilisateur (avec mot de passe)
 class UserCreate(UserBase):
-    pass
+    password: str
 
-class UserUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
-
-class User(UserBase):
+# Schéma pour afficher un utilisateur (sans mot de passe)
+class UserResponse(UserBase):
     id: int
-    created_at: datetime
-    updated_at: Optional[datetime] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+

@@ -3,11 +3,17 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, engine
 import models
 from passlib.hash import bcrypt
+import crud, schemas
+
+app = FastAPI()
+
+# Route d'accueil
+@app.get("/")
+def home():
+    return {"message": "Bienvenue sur l'API de KONECTA 🚀"}
 
 # Créer les tables
 models.Base.metadata.create_all(bind=engine)
-
-app = FastAPI()
 
 # Dépendance pour récupérer une session DB
 def get_db():
@@ -36,6 +42,6 @@ def register(username: str, email: str, password: str, db: Session = Depends(get
 
     return {"message": "Utilisateur créé avec succès", "user_id": new_user.id}
 
-
-
-
+@app.post("/users", response_model=schemas.UserResponse)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    return crud.create_user(db=db, user=user)

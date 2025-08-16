@@ -1,17 +1,19 @@
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
 from models import User
 from schemas import UserCreate
-from passlib.hash import bcrypt
 
-def create_user(db: Session, user: UserCreate):
-    # Hacher le mot de passe
-    pass_word = bcrypt.hash(user.password)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    # Créer l'objet utilisateur
+def hash_password(p: str) -> str:
+    return pwd_context.hash(p)
+
+def create_user(db: Session, user: UserCreate) -> User:
     db_user = User(
         username=user.username,
         email=user.email,
-        pass_word=pass_word,
+        pass_word=hash_password(user.password),
+        role=user.role,  # <--- important
     )
     db.add(db_user)
     db.commit()

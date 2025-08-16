@@ -1,20 +1,16 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
-from datetime import datetime
+from pydantic import BaseModel, EmailStr, Field
 
-# Schéma de base (propriétés communes)
 class UserBase(BaseModel):
     username: str
     email: EmailStr
+    role: str = "agent"  # <--- nouveau champ exposé côté API
 
-# Schéma pour la création d'utilisateur (avec mot de passe)
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(min_length=6)
 
-# Schéma pour afficher un utilisateur (sans mot de passe)
+
 class UserResponse(UserBase):
     id: int
 
     class Config:
-        orm_mode = True
-
+         from_attributes= True

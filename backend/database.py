@@ -20,3 +20,10 @@ Base = declarative_base()
 
 if __name__ == "__main__":
     print("Connexion réussie à la base de données")
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

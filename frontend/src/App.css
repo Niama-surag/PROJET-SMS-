@@ -1,38 +1,146 @@
+/* SMS Campaign Platform Styles */
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+/* Custom styles for better UI */
+.ant-layout-sider {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.ant-layout-header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ant-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: 600;
+}
+
+.ant-statistic-title {
+  color: #666;
+  font-weight: 500;
+}
+
+.ant-statistic-content {
+  color: #262626;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    position: fixed !important;
+    height: 100vh;
+    z-index: 999;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .ant-layout-content {
+    margin-left: 0 !important;
   }
+}
+
+/* Custom button styles */
+.ant-btn-primary {
+  border-radius: 6px;
+}
+
+.ant-btn {
+  border-radius: 6px;
+}
+
+/* Form improvements */
+.ant-form-item-label > label {
+  font-weight: 500;
+}
+
+/* Table improvements */
+.ant-table-tbody > tr:hover > td {
+  background-color: #f5f5f5;
+}
+
+/* Progress bar improvements */
+.ant-progress-line {
+  margin-bottom: 0;
+}
+
+/* Chart container */
+.recharts-wrapper {
+  font-size: 12px;
+}
+
+/* Modal improvements */
+.ant-modal-header {
+  border-radius: 8px 8px 0 0;
+}
+
+.ant-modal-content {
+  border-radius: 8px;
+}
+
+/* Tag improvements */
+.ant-tag {
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Custom colors for different campaign types */
+.campaign-promotional {
+  color: #1890ff;
+}
+
+.campaign-welcome {
+  color: #52c41a;
+}
+
+.campaign-reminder {
+  color: #faad14;
+}
+
+.campaign-notification {
+  color: #f5222d;
+}
+
+/* Status indicators */
+.status-active {
+  color: #52c41a;
+}
+
+.status-draft {
+  color: #faad14;
+}
+
+.status-paused {
+  color: #ff7a45;
+}
+
+.status-completed {
+  color: #722ed1;
+}
+
+/* Loading states */
+.ant-spin-container {
+  min-height: 200px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

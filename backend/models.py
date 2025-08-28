@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 from datetime import datetime
 from sqlalchemy import (
     Integer, String, Text, DateTime, ForeignKey, Table, Column, Boolean
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import relationship
 from database import Base
 
 
@@ -12,16 +10,14 @@ from database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    username: Mapped[str] = mapped_column(String(100), nullable=False)
-    email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    # mot de passe stocké hashé
-    pass_word: Mapped[str] = mapped_column(String, nullable=False)
-    # nouveau champ rôle
-    role: Mapped[str] = mapped_column(String(50), nullable=False, default="agent")
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    pass_word = Column(String, nullable=False)
+    role = Column(String(50), nullable=False, default="agent")
 
 
-# ---------- Table d’association MailingList <-> Contact ----------
+# ---------- Table d'association MailingList <-> Contact ----------
 mailinglist_contact = Table(
     "mailinglist_contact",
     Base.metadata,
@@ -34,58 +30,74 @@ mailinglist_contact = Table(
 class Message(Base):
     __tablename__ = "messages"
 
-    id_message: Mapped[int] = mapped_column(Integer, primary_key=True)
-    contenu: Mapped[str] = mapped_column(Text)
-    date_envoi: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    statut_livraison: Mapped[str] = mapped_column(String(50))
-    identifiant_expediteur: Mapped[str] = mapped_column(String(100))
+    id_message = Column(Integer, primary_key=True)
+    contenu = Column(Text)
+    date_envoi = Column(DateTime, default=datetime.utcnow)
+    statut_livraison = Column(String(50))
+    identifiant_expediteur = Column(String(100))
+    
+    campagne_id = Column(ForeignKey("campagnes.id_campagne"))
+    campagne = relationship("Campagne", back_populates="messages")
 
-    campagne_id: Mapped[int] = mapped_column(ForeignKey("campagnes.id_campagne"))
-    campagne: Mapped["Campagne"] = relationship(back_populates="messages")
 
-    def envoyer_message(self):
-        self.date_envoi = datetime.utcnow()
-        self.statut_livraison = "envoyé"
-
-    def verifier_statut_livraison(self):
-        return self.statut_livraison
+# Association table for Campaign <-> Contact many-to-many
+campagne_contact = Table(
+    "campagne_contact",
+    Base.metadata,
+    Column("campagne_id", ForeignKey("campagnes.id_campagne"), primary_key=True),
+    Column("contact_id", ForeignKey("contacts.id_contact"), primary_key=True),
+)
 
 
 # ---------- MailingList ----------
 class MailingList(Base):
     __tablename__ = "mailing_lists"
 
-    id_liste: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nom_liste: Mapped[str] = mapped_column(String(100))
-
-    contacts: Mapped[list["Contact"]] = relationship(
+    id_liste = Column(Integer, primary_key=True)
+    nom_liste = Column(String(100))
+    description = Column(Text, nullable=True)
+    date_creation = Column(DateTime, default=datetime.utcnow)
+    
+    contacts = relationship(
+        "Contact",
         secondary=mailinglist_contact,
-        back_populates="mailing_lists",
+        back_populates="listes_diffusion"
     )
-
-    def ajouter_contact_a_liste(self, contact: "Contact"):
-        self.contacts.append(contact)
-
-    def retirer_contact_de_liste(self, contact: "Contact"):
-        self.contacts.remove(contact)
-
-    def segmenter_liste(self):
-        return [c for c in self.contacts if c.statut_opt_in]
 
 
 # ---------- Contact ----------
 class Contact(Base):
     __tablename__ = "contacts"
 
-    id_contact: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nom: Mapped[str] = mapped_column(String(100))
-    prenom: Mapped[str] = mapped_column(String(100))
-    numero_telephone: Mapped[str] = mapped_column(String(50))
-    statut_opt_in: Mapped[bool] = mapped_column(Boolean, default=True)
-
-    mailing_lists: Mapped[list["MailingList"]] = relationship(
+    id_contact = Column(Integer, primary_key=True)
+    nom = Column(String(100))
+    prenom = Column(String(100))
+    numero_telephone = Column(String(50), unique=True)
+    email = Column(String(100), nullable=True)
+    statut_opt_in = Column(Boolean, default=True)
+    
+    ville = Column(String(100), nullable=True)
+    region = Column(String(100), nullable=True)
+    code_postal = Column(String(10), nullable=True)
+    type_client = Column(String(50), nullable=True)
+    age = Column(Integer, nullable=True)
+    genre = Column(String(1), nullable=True)
+    
+    date_inscription = Column(DateTime, default=datetime.utcnow)
+    derniere_activite = Column(DateTime, nullable=True)
+    source = Column(String(100), nullable=True)
+    notes = Column(Text, nullable=True)
+    
+    listes_diffusion = relationship(
+        "MailingList",
         secondary=mailinglist_contact,
-        back_populates="contacts",  # côté opposé s'appelle "contacts" dans MailingList
+        back_populates="contacts"
+    )
+    
+    campagnes = relationship(
+        "Campagne",
+        secondary=campagne_contact,
+        back_populates="contacts"
     )
 
 
@@ -93,73 +105,76 @@ class Contact(Base):
 class Campagne(Base):
     __tablename__ = "campagnes"
 
-    id_campagne: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nom_campagne: Mapped[str] = mapped_column(String(150))
-    date_debut: Mapped[datetime] = mapped_column(DateTime)
-    date_fin: Mapped[datetime] = mapped_column(DateTime)
-    statut: Mapped[str] = mapped_column(String(50))
-
-    messages: Mapped[list["Message"]] = relationship(back_populates="campagne")
-
-    def creer_campagne(self):
-        self.statut = "créée"
-
-    def lancer_campagne(self):
-        self.statut = "en cours"
-
-    def suspendre_campagne(self):
-        self.statut = "suspendue"
-
-    def terminer_campagne(self):
-        self.statut = "terminée"
-
-
-# ---------- Rapport de campagne ----------
-class CampaignReport(Base):
-    __tablename__ = "rapports"
-
-    id_rapport: Mapped[int] = mapped_column(Integer, primary_key=True)
-    taux_ouverture: Mapped[float] = mapped_column()
-    taux_clics: Mapped[float] = mapped_column()
-    taux_conversion: Mapped[float] = mapped_column()
-    nombre_desabonnements: Mapped[int] = mapped_column(Integer)
-
-    def generer_rapport(self):
-        return {
-            "ouverture": self.taux_ouverture,
-            "clics": self.taux_clics,
-            "conversion": self.taux_conversion,
-            "désabonnements": self.nombre_desabonnements,
-        }
-
-
-# ---------- Modèles de message ----------
-class MessageTemplate(Base):
-    __tablename__ = "templates"
-
-    id_modele: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nom_modele: Mapped[str] = mapped_column(String(150))
-    contenu_modele: Mapped[str] = mapped_column(Text)
-
-    def creer_modele(self, nom: str, contenu: str):
-        self.nom_modele = nom
-        self.contenu_modele = contenu
-
-    def modifier_modele(self, nouveau_contenu: str):
-        self.contenu_modele = nouveau_contenu
-
-
-
-
-
-
-
-
-
-
-
+    id_campagne = Column(Integer, primary_key=True)
+    nom_campagne = Column(String(100))
+    type_campagne = Column(String(50))
+    date_creation = Column(DateTime, default=datetime.utcnow)
+    date_debut = Column(DateTime)
+    date_fin = Column(DateTime, nullable=True)
     
+    message_template = Column(Text)
+    personnalisation_active = Column(Boolean, default=False)
+    segment_cible = Column(String(100), nullable=True)
+    statut = Column(String(50), default="draft")
+    
+    messages = relationship("Message", back_populates="campagne")
+    contacts = relationship(
+        "Contact",
+        secondary=campagne_contact,
+        back_populates="campagnes"
+    )
+    
+    def personnaliser_message(self, contact):
+        """Personalize message for a specific contact"""
+        if not self.personnalisation_active or not self.message_template:
+            return self.message_template
+        
+        message = self.message_template
+        
+        placeholders = {
+            '{prenom}': contact.prenom or '',
+            '{nom}': contact.nom or '',
+            '{nom_complet}': f"{contact.prenom or ''} {contact.nom or ''}".strip(),
+            '{ville}': contact.ville or '',
+            '{region}': contact.region or '',
+            '{type_client}': contact.type_client or '',
+            '{age}': str(contact.age) if contact.age else '',
+        }
+        
+        for placeholder, value in placeholders.items():
+            message = message.replace(placeholder, value)
+        
+        return message
 
 
+# ---------- Statut Livraison ----------
+class StatutLivraison(Base):
+    __tablename__ = "statuts_livraison"
+
+    id_statut = Column(Integer, primary_key=True)
+    nom_statut = Column(String(50))
+    description = Column(Text, nullable=True)
 
 
+# ---------- Expéditeur ----------
+class Expediteur(Base):
+    __tablename__ = "expediteurs"
+
+    id_expediteur = Column(Integer, primary_key=True)
+    nom = Column(String(100))
+    numero_telephone = Column(String(50))
+    api_key = Column(String(255), nullable=True)
+    service_provider = Column(String(50), nullable=True)
+
+
+# ---------- Logs ----------
+class Log(Base):
+    __tablename__ = "logs"
+
+    id_log = Column(Integer, primary_key=True)
+    action = Column(String(100))
+    utilisateur_id = Column(ForeignKey("users.id"))
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    details = Column(Text, nullable=True)
+    
+    utilisateur = relationship("User")

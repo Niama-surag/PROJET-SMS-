@@ -7,8 +7,12 @@ import crud, database
 from schemas import UserCreate, UserLogin, UserRead, TokenOut, Settings
 from security import verify_password
 from models import User
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+
+class Settings(BaseModel):
+    authjwt_secret_key: str = "supersecretkey123"  #clé secrète JWT
 
 # Charger la config JWT depuis schemas.Settings
 @AuthJWT.load_config

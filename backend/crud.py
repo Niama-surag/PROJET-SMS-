@@ -15,6 +15,8 @@ def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
 def create_user(db: Session, user: UserCreate) -> User:
+    print(f"🔍 Creating user: {user.username} with email: {user.email}")
+    
     if get_user_by_email(db, user.email):
         raise ValueError("Email déjà utilisé")
     if get_user_by_username(db, user.username):
@@ -26,9 +28,13 @@ def create_user(db: Session, user: UserCreate) -> User:
         pass_word=hash_password(user.password),
         role=user.role
     )
+    
+    print(f"✅ Adding user to database...")
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    
+    print(f"🎉 User created successfully with ID: {db_user.id}")
     return db_user
 
 # ==================== CONTACT CRUD ====================
@@ -197,3 +203,4 @@ def bulk_create_contacts(db: Session, contacts: List[ContactCreate], source: str
             results["errors"].append(f"Ligne {i+1}: {str(e)}")
     
     return results
+

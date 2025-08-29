@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_jwt_auth.exceptions import AuthJWTException
@@ -594,6 +593,81 @@ def dashboard_stats(db: Session = Depends(get_db)):
         "platform_status": "active",
         "last_updated": datetime.now().isoformat()
     }
+
+# --- TEST ENDPOINTS FOR ALL TABLES ---
+from schemas import UserCreate, ContactCreate, CampagneCreate, MessageTemplateCreate
+
+# User
+@app.post("/test/create-user", response_model=UserRead)
+def test_create_user(username: str, email: str, password: str, role: str = "agent", db: Session = Depends(get_db)):
+    user_data = UserCreate(username=username, email=email, password=password, role=role)
+    return crud.create_user(db, user_data)
+
+@app.get("/test/users", response_model=List[UserRead])
+def test_list_users(db: Session = Depends(get_db)):
+    return db.query(models.User).all()
+
+# Contact
+@app.post("/test/create-contact")
+def test_create_contact(nom: str, prenom: str, numero_telephone: str, email: str = None, db: Session = Depends(get_db)):
+    contact_data = ContactCreate(nom=nom, prenom=prenom, numero_telephone=numero_telephone, email=email)
+    return crud.create_contact(db, contact_data)
+
+@app.get("/test/contacts")
+def test_list_contacts(db: Session = Depends(get_db)):
+    return db.query(models.Contact).all()
+
+# MailingList
+@app.post("/test/create-mailinglist")
+def test_create_mailinglist(nom_liste: str, description: str = None, db: Session = Depends(get_db)):
+    mailinglist = models.MailingList(nom_liste=nom_liste, description=description)
+    db.add(mailinglist)
+    db.commit()
+    db.refresh(mailinglist)
+    return mailinglist
+
+@app.get("/test/mailinglists")
+def test_list_mailinglists(db: Session = Depends(get_db)):
+    return db.query(models.MailingList).all()
+
+# Campagne
+@app.post("/test/create-campagne")
+def test_create_campagne(nom_campagne: str, type_campagne: str, db: Session = Depends(get_db)):
+    campagne = models.Campagne(nom_campagne=nom_campagne, type_campagne=type_campagne)
+    db.add(campagne)
+    db.commit()
+    db.refresh(campagne)
+    return campagne
+
+@app.get("/test/campagnes")
+def test_list_campagnes(db: Session = Depends(get_db)):
+    return db.query(models.Campagne).all()
+
+# MessageTemplate
+@app.post("/test/create-messagetemplate")
+def test_create_messagetemplate(nom_modele: str, contenu_modele: str, db: Session = Depends(get_db)):
+    template = models.MessageTemplate(nom_modele=nom_modele, contenu_modele=contenu_modele)
+    db.add(template)
+    db.commit()
+    db.refresh(template)
+    return template
+
+@app.get("/test/messagetemplates")
+def test_list_messagetemplates(db: Session = Depends(get_db)):
+    return db.query(models.MessageTemplate).all()
+
+# CampaignReport
+@app.post("/test/create-campaignreport")
+def test_create_campaignreport(campagne_id: int, db: Session = Depends(get_db)):
+    report = models.CampaignReport(campagne_id=campagne_id)
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report
+
+@app.get("/test/campaignreports")
+def test_list_campaignreports(db: Session = Depends(get_db)):
+    return db.query(models.CampaignReport).all()
 
 if __name__ == "__main__":
     import uvicorn

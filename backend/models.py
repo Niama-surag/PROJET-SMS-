@@ -82,7 +82,7 @@ class Contact(Base):
     code_postal = Column(String(10), nullable=True)
     type_client = Column(String(50), nullable=True)
     age = Column(Integer, nullable=True)
-    genre = Column(String(1), nullable=True)
+    genre = Column(String(10), nullable=True)
     
     date_inscription = Column(DateTime, default=datetime.utcnow)
     derniere_activite = Column(DateTime, nullable=True)

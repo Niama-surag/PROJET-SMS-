@@ -149,3 +149,10 @@ class SmsResponse(BaseModel):
     sent_at: datetime
     message_id: Optional[str] = None
 
+# ---- Message Template Schemas ----
+class MessageTemplateCreate(BaseModel):
+    nom_modele: str
+    contenu_modele: str
+    actif: bool = True
+    date_creation: Optional[datetime] = None
+
